@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GREYFIVEM</title>
+  <style>
+    body {
+      background-color: #2D0240;
+      color: #E0D7F3;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #BB86FC;
+    }
+    button {
+      background-color: #BB86FC;
+      border: none;
+      padding: 10px 20px;
+      color: #2D0240;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #9C4FC7;
+    }
+    pre {
+      background-color: #3D1B54;
+      border: 1px solid #BB86FC;
+      color: #E0D7F3;
+      padding: 10px;
+      width: 80%;
+      overflow-x: auto;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>GREYFIVEM</h1>
+
+<button onclick="generateNSH()">GEN .NSH</button>
+
+<pre id="output"></pre>
+<button onclick="downloadFile()">Baixar .nsh</button>
+
+<script>
+  function generateRandomCode(base) {
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return base.split('').map(char => 
+      char.match(/[A-Z0-9]/) ? chars[Math.floor(Math.random() * chars.length)] : char
+    ).join('');
+  }
+
+  function generateNSH() {
+    let base = "A9T0CDXMGN48Z5Y"; // Base padrão definida automaticamente
+    let nshCode = `echo -on\ngoto SPOOFSERIAL\n\n:SPOOFSERIAL\nAMIDEEFIx64.efi /BS ${generateRandomCode(base)}\ngoto SPOOFUUID\n\n:SPOOFUUID\nAMIDEEFIx64.efi /SU AUTO\ngoto SPOOF1\n`;
+
+    for (let i = 1; i <= 12; i++) {
+      nshCode += `\n:SPOOF${i}\nAMIDEEFIx64.efi /SM ${generateRandomCode(base)}\ngoto SPOOF${i + 1}`;
+    }
+
+    nshCode += `\n\n:EXIT\nexit\ngoto END\n\n:END`;
+    document.getElementById("output").textContent = nshCode;
+  }
+
+  function downloadFile() {
+    let nshContent = document.getElementById("output").textContent;
+    let blob = new Blob([nshContent], { type: "text/plain" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "script.nsh";
+    link.click();
+  }
+</script>
+
+</body>
+</html>
